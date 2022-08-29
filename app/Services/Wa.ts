@@ -122,8 +122,8 @@ class Wa {
                             tanggalmasukwa: tgl
                         }).finally(async () => {
                             await sock.sendMessage(message[0].key.remoteJid!, {text: 'Terima kasih telah menghubungi Perguruan Panca Budi. Silakan ketik "Menu" untuk Informasi Administrasi Keuangan Sekolah'})
-                            return
                         })
+                        return
                     } else {
 
                         console.log("SAME OR NOT "+tgl.toISODate(), ava.tanggalmasukwa.toISODate())
