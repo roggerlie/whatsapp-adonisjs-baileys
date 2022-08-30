@@ -18,7 +18,7 @@ export default class Usersession extends BaseModel {
   public nama: string
 
   @column.date({columnName: 'tanggalmasukwa'})
-  public tanggalmasukwa: DateTime
+  public tanggalmasukwa: DateTime | null
  
   @column({columnName: 'active'})
   public active: string
