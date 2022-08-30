@@ -129,7 +129,7 @@ class Wa {
                     } else {
 
                         console.log("SAME OR NOT "+tgl.toISODate(), ava.tanggalmasukwa.toISODate())
-                        if(tgl.toISODate() !== ava.tanggalmasukwa.toISODate() || ava.active === 'false') {
+                        if(tgl.toISODate() !== ava.tanggalmasukwa.toISODate()) {
                             await Usersession.query().where('hp', hp!).update({
                                 tanggalmasukwa: tgl.toISODate(),
                                 active: 'false'
@@ -147,6 +147,7 @@ class Wa {
 
                     if(message[0].message?.conversation === '7') {
                         await Usersession.query().where('hp', hp!).update({
+                            tanggalmasukwa: null,
                             active: 'false'
                         }).finally(async () => {
                             await sock.sendMessage(message[0].key.remoteJid!, {text: 'berhasil logout'})
