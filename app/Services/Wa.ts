@@ -41,6 +41,8 @@ class Wa {
             arr.push(`${(k+1)}. ${v.info}`)
         })
 
+        arr.push('7. Logout')
+
         const logger = MAIN_LOGGER.child({})
         logger.level = 'debug'
 
@@ -142,6 +144,16 @@ class Wa {
                     .where('hp', hp!).where('tanggalmasukwa', tgl.toISODate())
                     .where('active', 'true')
                     .first()
+
+                    if(message[0].message?.conversation === '7') {
+                        await Usersession.query().where('hp', hp!).update({
+                            active: 'false'
+                        }).finally(async () => {
+                            await sock.sendMessage(message[0].key.remoteJid!, {text: 'berhasil logout'})
+                            await sock.sendMessage(message[0].key.remoteJid!, {text: 'terima kasih sudah menggunakan layanan ini ...'})
+                            return
+                        })
+                    }
                     
                     if(message[0].message?.conversation?.match(/menu/i)) {
                         await this.waiting(message[0])
