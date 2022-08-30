@@ -11,7 +11,6 @@ import makeWASocket, {
 } from '@adiwajshing/baileys'
 import MAIN_LOGGER from '@adiwajshing/baileys/lib/Utils/logger'
 import Botmenu from 'App/Models/Botmenu'
-import Drive from '@ioc:Adonis/Core/Drive'
 import Usersession from 'App/Models/Usersession'
 import { DateTime } from 'luxon'
 import Siswa from 'App/Models/jbsakad/Siswa'
@@ -159,14 +158,14 @@ class Wa {
                         const cek = await Botmenu.find(message[0].message.conversation)
 
                         if(cek?.isimage === 'true') {
-                            await sock.sendMessage(message[0].key.remoteJid!, {text: 'please wait ...'})
-                            const drive = Drive.list('.')
-                            const folder = await drive.toArray()
-                            folder.forEach(async v => {
+                            // await sock.sendMessage(message[0].key.remoteJid!, {text: 'please wait ...'})
+                            // const drive = Drive.list('.')
+                            // const folder = await drive.toArray()
+                            // folder.forEach(async v => {
 
-                                const image = await Drive.get(v.location)
-                                await sock.sendMessage(message[0].key.remoteJid!, {image: image})
-                            })
+                            //     const image = await Drive.get(v.location)
+                            //     await sock.sendMessage(message[0].key.remoteJid!, {image: image})
+                            // })
                             await sock.sendMessage(message[0].key.remoteJid!, {text: cek?.reply!})
                         }
 
@@ -184,7 +183,7 @@ class Wa {
                                 tagihan.forEach(v => {
                                     tm.push(`${v.tagihantermin} ${v.$extras.totaltagihan} ${v.tagihanaktif === '1' ? 'belum' : 'lunas'}`)
                                 })
-                                await sock.sendMessage(message[0].key.remoteJid!, {text: tm.join('\r\n')})
+                                await sock.sendMessage(message[0].key.remoteJid!, {text: `Noreg ${ceksesi.noreg}\nNama ${ceksesi.nama}\n${tm.join('\r\n')}`})
                             }
 
                             if(cek.command === 'inforincian') {
@@ -207,47 +206,58 @@ class Wa {
 
                         if(cek?.isimage === 'false' && cek.isaskdb === 'false') {
 
-                            const cp: 
-                            {
-                                [P in '01' | '06' | '02' | '03' | '05']: 
-                                {nama: string, jabatan: string, nohp: string}[]
-                            } = {
-                                '01': [
-                                    {nama: 'Susiani', jabatan: 'WKS', nohp: '081264737606'},
-                                    {nama: 'Djairida', jabatan: 'WKS', nohp: '082274069292'}
-                                ],
-                                '06': [
-                                    {nama: 'Sudirman', jabatan: 'WKS', nohp: '082277639688'},
-                                    {nama: 'Musdiyanto', jabatan: 'WKS', nohp: '082272940616'}
-                                ],
-                                '02': [
-                                    {nama: 'Ermayadi', jabatan: 'WKS', nohp: '082366307460'},
-                                    {nama: 'Apri', jabatan: 'WKS', nohp: '082296003390'}
-                                ],
-                                '03': [
-                                    {nama: 'Susanti', jabatan: 'WKS', nohp: '082272940631'},
-                                    {nama: 'Adlin', jabatan: 'WKS', nohp: '08126417103'}
-                                ],
-                                '05': [
-                                    {nama: 'Hariyanti', jabatan: 'WKS', nohp: '085297351824'},
-                                    {nama: 'Ferdinand', jabatan: 'WKS', nohp: '082275000378'}
-                                ]
+                            if(cek.command === 'infogabung') {
+
+                                const ganti = cek.reply.replace(/#/g, '⭐')
+                                await sock.sendMessage(message[0].key.remoteJid!, {
+                                    text: ganti,
+                                    templateButtons: [
+                                        {urlButton: {displayText: 'Link Portal', url: 'https://bit.ly/3Cvhm1v'}}
+                                    ]
+                                })
+
+                            } else {
+
+                                const cp: 
+                                {
+                                    [P in '01' | '06' | '02' | '03' | '05']: 
+                                    {nama: string, jabatan: string, nohp: string}[]
+                                } = {
+                                    '01': [
+                                        {nama: 'Susiani', jabatan: 'WKS', nohp: '081264737606'},
+                                        {nama: 'Djairida', jabatan: 'WKS', nohp: '082274069292'}
+                                    ],
+                                    '06': [
+                                        {nama: 'Sudirman', jabatan: 'WKS', nohp: '082277639688'},
+                                        {nama: 'Musdiyanto', jabatan: 'WKS', nohp: '082272940616'}
+                                    ],
+                                    '02': [
+                                        {nama: 'Ermayadi', jabatan: 'WKS', nohp: '082366307460'},
+                                        {nama: 'Apri', jabatan: 'WKS', nohp: '082296003390'}
+                                    ],
+                                    '03': [
+                                        {nama: 'Susanti', jabatan: 'WKS', nohp: '082272940631'},
+                                        {nama: 'Adlin', jabatan: 'WKS', nohp: '08126417103'}
+                                    ],
+                                    '05': [
+                                        {nama: 'Hariyanti', jabatan: 'WKS', nohp: '085297351824'},
+                                        {nama: 'Ferdinand', jabatan: 'WKS', nohp: '082275000378'}
+                                    ]
+                                }
+
+                                const cpkepsek = cp[ceksesi.noreg.substring(0, 2)]
+                                
+                                let arrt: string[] = []
+                                cpkepsek.forEach((v: { nama: string, nohp: string }) => arrt.push(`${v.nama} ${v.nohp}`))
+
+                                let pesan: string 
+                                if(cek.command === 'infopelunasan') pesan = cek.reply
+                                else pesan = `${cek.reply}\n${arrt.join('\r\n')}`
+                                
+                                await sock.sendMessage(message[0].key.remoteJid!, {
+                                    text: pesan
+                                })
                             }
-
-                            const cpkepsek = cp[ceksesi.noreg.substring(0, 2)]
-                            
-                            let arrt: string[] = []
-                            cpkepsek.forEach((v: { nama: string, nohp: string }) => arrt.push(`${v.nama} ${v.nohp}`))
-
-                            const ganti = cek.reply.replace(/#/g, '⭐')
-                            let pesan: string 
-                            if(cek.command === 'infopelunasan') pesan = cek.reply
-                            else if(cek.command === 'infopin') pesan = `${ganti}\n${arrt.join('\r\n')}`
-                            else pesan = ganti
-                            
-                            await sock.sendMessage(message[0].key.remoteJid!, {
-                                text: pesan
-                            })
                         }
                     }
 
