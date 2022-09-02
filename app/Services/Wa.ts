@@ -17,6 +17,7 @@ import Siswa from 'App/Models/jbsakad/Siswa'
 import Tagihansiswa from 'App/Models/jbsfina/Tagihansiswa'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Env from '@ioc:Adonis/Core/Env'
+import Badword from 'App/Models/Badword'
 
 class Wa {
 
@@ -105,6 +106,11 @@ class Wa {
                 await this.socket.readMessages([message[0].key])
 
                 if(messages.type === 'notify') {
+
+                    (await Badword.all()).forEach(async v => {
+                        const kj = message[0].message?.conversation?.toLowerCase().includes(v.word)
+                        if(kj) return await sock.sendMessage(message[0].key.remoteJid!, {text: 'badword detected'})
+                    })
 
                     const hp = message[0].key.remoteJid?.split('@')[0]
                     const tgl = DateTime.now()
@@ -272,10 +278,34 @@ class Wa {
                         }
                     }
 
-                    if(message[0].message?.conversation?.match(/^([0-9]{2}).([\.0-9]{2,8})$/i) && ceksesi === null) {
+                    // if(message[0].message?.conversation?.match(/^([0-9]{2}).([\.0-9]{2,8})$/i) && ceksesi === null) {
+                    if(message[0].message?.conversation?.match(/^\w+( \w+)*\s([0-9]{2}).([\.0-9]{2,8})$/i) && ceksesi === null) {
+
+                        const nr = await Usersession.query().where('hp', hp!).first()
+                        const nisnama = message[0].message.conversation.split(' ')
+
+                        let like: string
+                        let ns: string
+                        if(nisnama.length === 3) {
+                            like = nisnama[0]+' '+nisnama[1]
+                            ns = nisnama[2]
+
+                        } else {
+                            like = nisnama[0]
+                            ns = nisnama[1]
+                        }
+                        const ceknama = await Siswa.query()
+                        .whereRaw(`LEFT(noun, 2) = ${nr?.noreg.substring(0, 2)}`)
+                        .whereILike('nama', `%${like}%`)
+                        .first()
+                        
+                        if(ceknama === null) {
+                            await sock.sendMessage(message[0].key.remoteJid!, {text: 'nama tidak ditemukan !'})
+                            return 
+                        }
 
                         const siswa = await Siswa.query()
-                        .where('nis', message[0].message.conversation)
+                        .where('nis', ns)
                         .first()
 
                         if(siswa === null) {
