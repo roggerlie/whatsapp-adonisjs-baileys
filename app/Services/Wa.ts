@@ -73,6 +73,38 @@ class Wa {
 
         this.socket = sock
 
+        setInterval(async () => {
+
+            // console.log('ADD '+DateTime.now().minus({minute: 30}).toFormat('HH:mm'))
+
+            const alluser = await Usersession.query().where('active', 'true')
+            if(alluser !== null) {
+                alluser.forEach(async v => {
+
+                    const waktumasuk = DateTime.fromFormat(v.jammasukwa, 'HH:mm:ss').plus({minute: 30})
+                    const reminder = waktumasuk.minus({minute: 2})
+
+                    const waktusekarang = DateTime.now().toFormat('HH:mm')
+
+                    if(reminder.toFormat('HH:mm') === waktusekarang && v.reminder === 'true') {
+
+                        await sock.sendMessage(`${v.hp}@s.whatsapp.net`, {text: 'apakah kamu masih terhubung ?'})
+                        await Usersession.query().where('id', v.id).update({
+                            reminder: 'false'
+                        })
+
+                    } else if(waktumasuk.toFormat('HH:mm') === waktusekarang) {
+
+                        await sock.sendMessage(`${v.hp}@s.whatsapp.net`, {text: 'sesi berakhir'})
+                        await Usersession.query().where('id', v.id).update({
+                            active: 'false'
+                        })
+                    }
+                })
+            }
+
+        }, 5000)
+
         sock.ev.process(async (events) => {
     
             if(events['creds.update']) await saveCreds()
@@ -134,6 +166,10 @@ class Wa {
                         
                     } else {
 
+                        await Usersession.query().where('hp', hp!).update({
+                            jammasukwa: tgl.toFormat('HH:mm:ss')
+                        })
+
                         // console.log("SAME OR NOT "+tgl.toISODate(), ava.tanggalmasukwa.toISODate())
                         if(ava.tanggalmasukwa === null || tgl.toISODate() !== ava.tanggalmasukwa?.toISODate()) {
                             await Usersession.query().where('hp', hp!).update({
@@ -154,7 +190,9 @@ class Wa {
                     if(message[0].message?.conversation === '7') {
                         await Usersession.query().where('hp', hp!).update({
                             tanggalmasukwa: null,
-                            active: 'false'
+                            jammasukwa: null,
+                            active: 'false',
+                            reminder: 'false'
                         }).finally(async () => {
                             await sock.sendMessage(message[0].key.remoteJid!, {text: 'berhasil logout'})
                             await sock.sendMessage(message[0].key.remoteJid!, {text: 'terima kasih sudah menggunakan layanan ini ...'})
@@ -171,7 +209,7 @@ class Wa {
 
                         await this.waiting(message[0])
                         if(ceksesi === null) {
-                            await sock.sendMessage(message[0].key.remoteJid!, {text: 'masukkan nis dulu ya ...'})
+                            await sock.sendMessage(message[0].key.remoteJid!, {text: 'masukkan nama nis dulu ya ...'})
                             return
                         }
 
@@ -321,7 +359,9 @@ class Wa {
                             nis: siswa.nis,
                             noreg: siswa.noreg,
                             nama: siswa.nama,
-                            active: true
+                            jammasukwa: tgl.toFormat('HH:mm:ss'),
+                            active: true,
+                            reminder: true
                         }).finally(async () => await sock.sendMessage(message[0].key.remoteJid!, {
                             text: 'Informasi pembayaran administrasi sekolah perguruan panca budi \n\n'+arr.join('\r\n')
                         }))

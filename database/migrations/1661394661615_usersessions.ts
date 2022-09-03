@@ -11,6 +11,8 @@ export default class extends BaseSchema {
       table.string('noreg', 16)
       table.string('nama', 64)
       table.date('tanggalmasukwa')
+      table.time('jammasukwa')
+      table.enum('reminder', [true, false]).defaultTo(false)
       table.enum('active', [true, false]).defaultTo(false)
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

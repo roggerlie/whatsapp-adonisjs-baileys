@@ -19,9 +19,15 @@ export default class Usersession extends BaseModel {
 
   @column.date({columnName: 'tanggalmasukwa'})
   public tanggalmasukwa: DateTime | null
+
+  @column()
+  public jammasukwa: string
  
-  @column({columnName: 'active'})
+  @column()
   public active: string
+
+  @column()
+  public reminder: string
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
