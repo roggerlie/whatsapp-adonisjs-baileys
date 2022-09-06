@@ -390,7 +390,7 @@ class Wa {
               ns = nisnama[1];
             }
             const ceknama = await Siswa.query()
-              .whereRaw(`LEFT(noun, 2) = ${nr?.noreg.substring(0, 2)}`)
+              // .whereRaw(`LEFT(noun, 2) = ${nr?.noreg.substring(0, 2)}`)
               .whereILike('nama', `%${like}%`)
               .first();
 
