@@ -255,7 +255,7 @@ class Wa {
               const reply = cek.reply.replace(/<mobile>/g, '📱');
               const rep = reply.replace(/<atm>/g, '🏧');
               await sock.sendMessage(message[0].key.remoteJid!, {
-                text: reply,
+                text: rep,
               });
             }
 
