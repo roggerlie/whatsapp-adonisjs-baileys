@@ -157,9 +157,10 @@ class Wa {
           // if(hp !== '6281265206860') return
 
           if (ava === null) {
-            console.log('Welcome');
+            console.log('Welcome ');
+
             await this.waiting(message[0]);
-            if (ava === null) return;
+            if (ava !== null) return;
             await Usersession.create({
               hp: hp,
               tanggalmasukwa: tgl,
